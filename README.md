@@ -155,7 +155,8 @@ An optional **Electron desktop app** for browsing the commit graph and
 reading notes interactively lives in [`app/`](app/) (see
 [`app/README.md`](app/README.md) and [`plan.md`](plan.md)).
 
-> Status: Phase 0 — scaffold + app shell (`npm run dev` inside `app/`).
+> Status: Phase 1 — git data layer with fixture-repo tests (`npm test` inside
+> `app/`); commit graph + note renderers are next.
 
 ## Notes / known constraints
 

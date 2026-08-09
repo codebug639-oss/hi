@@ -6,7 +6,10 @@ import { IpcChannels, type Api } from '../shared/ipc'
 const api: Api = {
   getAppVersion: () => ipcRenderer.invoke(IpcChannels.AppGetVersion),
   getPlatform: () => ipcRenderer.invoke(IpcChannels.AppGetPlatform),
-  openRepo: () => ipcRenderer.invoke(IpcChannels.RepoOpen)
+  openRepo: () => ipcRenderer.invoke(IpcChannels.RepoOpen),
+  loadGraph: (root, options) => ipcRenderer.invoke(IpcChannels.GraphLoad, root, options),
+  listNotes: (root) => ipcRenderer.invoke(IpcChannels.NotesList, root),
+  getNote: (root, commitSha) => ipcRenderer.invoke(IpcChannels.NotesGet, root, commitSha)
 }
 
 contextBridge.exposeInMainWorld('api', api)

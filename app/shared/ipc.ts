@@ -11,10 +11,15 @@
  * phases render it.
  */
 
+import type { GraphData, NoteRef, RefsScope } from './git'
+
 export const IpcChannels = {
   AppGetVersion: 'app:get-version',
   AppGetPlatform: 'app:get-platform',
-  RepoOpen: 'repo:open'
+  RepoOpen: 'repo:open',
+  GraphLoad: 'graph:load',
+  NotesList: 'notes:list',
+  NotesGet: 'notes:get'
 } as const
 
 /** A git repository that was successfully opened in the app. */
@@ -55,6 +60,12 @@ export interface Note {
   review_notes?: string
 }
 
+/** Options accepted by loadGraph. */
+export interface LoadGraphOptions {
+  scope?: RefsScope
+  maxCount?: number
+}
+
 /**
  * Typed surface exposed to the renderer via contextBridge as `window.api`.
  * Keep this in sync with electron/preload.ts.
@@ -63,4 +74,10 @@ export interface Api {
   getAppVersion(): Promise<string>
   getPlatform(): Promise<string>
   openRepo(): Promise<OpenRepoResult>
+  /** Load the commit graph for the given repo root. */
+  loadGraph(root: string, options?: LoadGraphOptions): Promise<GraphData>
+  /** List all notes in the repo (note-sha → commit-sha mapping). */
+  listNotes(root: string): Promise<NoteRef[]>
+  /** Get the raw note content for a commit, or null when it has no note. */
+  getNote(root: string, commitSha: string): Promise<string | null>
 }
