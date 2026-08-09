@@ -1,0 +1,20 @@
+appId: com.committiq.desktop
+productName: commitiq
+directories:
+  output: dist
+files:
+  - out/**
+  - package.json
+npmRebuild: false
+win:
+  target:
+    - nsis
+mac:
+  target:
+    - dmg
+  category: public.app-category.developer-tools
+linux:
+  target:
+    - AppImage
+    - deb
+  category: Development

@@ -1,0 +1,14 @@
+# dependencies
+node_modules/
+
+# electron-vite build output
+app/out/
+
+# electron-builder output
+app/dist/
+
+# logs
+*.log
+
+# commitiq runtime artifacts
+.committiq/
