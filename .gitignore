@@ -1,1 +1,11 @@
 .commitiq
+
+# dependencies
+node_modules/
+
+# build output
+app/out/
+app/dist/
+
+# logs
+*.log
