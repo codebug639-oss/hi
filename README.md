@@ -18,10 +18,14 @@ fork of git, no core changes, nothing to get merged upstream.
 
 ## Install
 
-**Linux / macOS / Git Bash on Windows:**
+**Linux / macOS / Git Bash on Windows — one-liner (downloads from GitHub):**
 ```bash
-bash /path/to/commitiq/install.sh
+curl -fsSL https://raw.githubusercontent.com/codebug639-oss/hi/main/install.sh | bash
 ```
+Or from a local checkout: `bash /path/to/commitiq/install.sh`. The
+installer uses local files when present, otherwise downloads `bin/` +
+`lib/` from GitHub (override with `COMMITIQ_REPO=owner/repo` and
+`COMMITIQ_REF=main`).
 
 **Native Windows (PowerShell):**
 ```powershell

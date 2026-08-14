@@ -14,11 +14,24 @@ every repository on your machine.
 
 ## Step 1 — Install
 
-**Linux / macOS / Git Bash on Windows:**
+**Linux / macOS / Git Bash on Windows — one-liner (downloads from GitHub):**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/codebug639-oss/hi/main/install.sh | bash
+```
+
+> To install from a fork or a pinned version instead:
+> `COMMITIQ_REPO=owner/repo COMMITIQ_REF=v1.0.0 curl -fsSL <url> | bash`.
+
+Or from a local checkout of this repo:
 
 ```bash
 bash /path/to/commitiq/install.sh
 ```
+
+The installer auto-detects: if `bin/` sits next to the script it copies
+those files; otherwise it downloads `bin/` + `lib/` from GitHub
+(`raw.githubusercontent.com/codebug639-oss/hi/<ref>`).
 
 **Native Windows (PowerShell):**
 
@@ -28,7 +41,7 @@ powershell -ExecutionPolicy Bypass -File \path\to\commitiq\install.ps1
 
 What the installer does:
 
-1. Copies the files into `~/.commitiq/` (bin + lib) and makes them executable.
+1. Copies (or downloads) the files into `~/.commitiq/` (bin + lib) and makes them executable.
 2. If `~/.commitiq/bin` is **not already on your `PATH`**, asks whether to
    add it — editing your shell rc file (`~/.bashrc`/`~/.zshrc`) or User
    PATH on Windows. **Nothing is modified without asking.** If you decline
