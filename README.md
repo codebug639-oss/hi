@@ -20,7 +20,7 @@ fork of git, no core changes, nothing to get merged upstream.
 
 **Linux / macOS / Git Bash on Windows — one-liner (downloads from GitHub):**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/codebug639-oss/hi/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/codebug639-oss/hi/master/install.sh | bash
 ```
 Or from a local checkout: `bash /path/to/commitiq/install.sh`. The
 installer uses local files when present, otherwise downloads `bin/` +

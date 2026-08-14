@@ -17,7 +17,7 @@ every repository on your machine.
 **Linux / macOS / Git Bash on Windows — one-liner (downloads from GitHub):**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/codebug639-oss/hi/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/codebug639-oss/hi/master/install.sh | bash
 ```
 
 > To install from a fork or a pinned version instead:
@@ -31,7 +31,7 @@ bash /path/to/commitiq/install.sh
 
 The installer auto-detects: if `bin/` sits next to the script it copies
 those files; otherwise it downloads `bin/` + `lib/` from GitHub
-(`raw.githubusercontent.com/codebug639-oss/hi/<ref>`).
+(`raw.githubusercontent.com/codebug639-oss/hi/<ref>`; currently `master`).
 
 **Native Windows (PowerShell):**
 
