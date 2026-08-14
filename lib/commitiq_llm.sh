@@ -234,12 +234,59 @@ extract_json_text() {
   '
 }
 
+# Shared prompt header: expert role, exact schema, field rules, and a
+# worked example. Kept in one place so the initial prompt, the strict
+# retry prompt, and the CLI path all use identical instructions.
+read -r -d '' PROMPT_INTRO <<'COMMITIQ_PROMPT_EOF' || true
+You are an expert software engineer writing a Conventional Commit summary for a changelog. You are given a git diff. Reply with ONLY a single valid JSON object and nothing else - no markdown, no code fences, no prose before or after.
+
+EXACT OUTPUT SCHEMA (all keys required):
+{"type":"feat|fix|refactor|docs|chore|test|perf|build|ci|revert|style","scope":"optional short scope or empty string","summary":"imperative summary under 60 characters","description":"2-4 sentences on what changed and why it matters","changed_files":["exact file paths from the diff"],"breaking_change":true|false,"review_notes":"anything a reviewer must know, or empty string"}
+
+RULES:
+1. Output exactly one JSON object. No markdown fences, no "Here is", no trailing commentary.
+2. type: pick the single best conventional-commit type:
+   - feat: new user-facing feature or capability
+   - fix: a bug fix
+   - perf: a measurable performance improvement
+   - docs: documentation-only change
+   - refactor: internal change that fixes no bug and adds no feature
+   - style: formatting, whitespace, or lint-only changes
+   - test: tests-only change
+   - build: build system or dependency changes
+   - ci: CI configuration changes
+   - chore: maintenance, tooling, or dependency updates
+   - revert: reverts an earlier change
+3. scope: short noun for the affected area (e.g. "auth", "parser"), or "" when none.
+4. summary: imperative mood, present tense, under 60 characters, no trailing period. Do not start with "Updated" or "Changed" - start with a verb such as Add, Fix, Refactor, Remove, Improve, Handle, Migrate. Say WHAT, not HOW.
+5. description: 2-4 sentences. What changed and why it matters; name the exact files or areas touched, using the paths exactly as they appear in the diff.
+6. changed_files: the exact file paths from the diff (full paths as git prints them). Never invent or rename files.
+7. breaking_change: true only if existing callers or behavior would break; otherwise false.
+8. review_notes: anything a reviewer must know (risks, follow-ups, related work), or "".
+9. The object must be valid JSON that jq can parse: escape quotes and backslashes, no trailing commas, no single quotes as string delimiters.
+
+WORKED EXAMPLE
+
+Diff:
+--- a/src/login.js
++++ b/src/login.js
+@@ -12,6 +12,8 @@
+-  if (token.expired) { throw new Error("expired"); }
++  if (token.expired) { return { error: "session expired" }; }
++  await refreshSession(token);
+
+Correct response:
+{"type":"fix","scope":"auth","summary":"Handle expired session tokens gracefully","description":"Login no longer throws when a session token has expired; it now returns a clear error and refreshes the session. Touches src/login.js.","changed_files":["src/login.js"],"breaking_change":false,"review_notes":"Callers that caught the old exception should handle the new error return value."}
+
+The diff to summarize follows:
+COMMITIQ_PROMPT_EOF
+
 build_prompt() {
   local diff_text="$1"
   if [ "$STRICT_RETRY" = "1" ]; then
-    printf 'Your previous response was not a valid JSON object. Respond with ONLY a single JSON object and nothing else - no markdown, no code fences, no commentary. Use exactly this schema:\n{"type":"feat"|"fix"|"refactor"|"docs"|"chore"|"test"|"perf"|"build"|"ci"|"revert"|"style","scope":"optional short scope or empty string","summary":"imperative summary under 60 characters","description":"2-4 sentences on what changed and why it matters, naming files/areas touched","changed_files":["list of changed files"],"breaking_change":true or false,"review_notes":"anything a reviewer must know, or empty string"}\n\nThe diff follows:\n\n%s' "$diff_text"
+    printf '%s\n\nYour previous response was not a valid JSON object. Respond AGAIN with ONLY a single JSON object matching the EXACT OUTPUT SCHEMA above - all keys present, valid JSON, no markdown.\n\n%s' "$PROMPT_INTRO" "$diff_text"
   else
-    printf 'You are summarizing a git commit diff for a changelog. Respond with a single JSON object and NOTHING else - no markdown, no code fences, no commentary. Use exactly this schema:\n{\n  "type": "feat"|"fix"|"refactor"|"docs"|"chore"|"test"|"perf"|"build"|"ci"|"revert"|"style",\n  "scope": "optional short scope, or empty string",\n  "summary": "imperative summary under 60 characters",\n  "description": "2-4 sentences on what changed and why it matters, naming the files/areas touched",\n  "changed_files": ["list of changed files"],\n  "breaking_change": true or false,\n  "review_notes": "anything a reviewer must know, or empty string"\n}\n\nThe diff follows:\n\n%s' "$diff_text"
+    printf '%s\n\n%s' "$PROMPT_INTRO" "$diff_text"
   fi
 }
 
@@ -275,10 +322,16 @@ is_valid_json() {
     *) return 1 ;;
   esac
   if command -v jq >/dev/null 2>&1; then
-    printf '%s' "$s" | jq -e 'has("type") and has("summary")' >/dev/null 2>&1
+    printf '%s' "$s" | jq -e '
+      type == "object"
+      and (.type | IN("feat", "fix", "refactor", "docs", "chore", "test", "perf", "build", "ci", "revert", "style"))
+      and (has("summary") and has("description") and has("changed_files") and has("breaking_change") and has("review_notes"))
+      and (.changed_files | type == "array")
+    ' >/dev/null 2>&1
   else
     printf '%s' "$s" | grep -q '"type"' || return 1
     printf '%s' "$s" | grep -q '"summary"' || return 1
+    printf '%s' "$s" | grep -Eq '"(feat|fix|refactor|docs|chore|test|perf|build|ci|revert|style)"' || return 1
   fi
 }
 

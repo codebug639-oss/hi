@@ -149,15 +149,6 @@ git commitiq log           # list commits that have a stored summary
 git commitiq help
 ```
 
-## Desktop app (work in progress)
-
-An optional **Electron desktop app** for browsing the commit graph and
-reading notes interactively lives in [`app/`](app/) (see
-[`app/README.md`](app/README.md) and [`plan.md`](plan.md)).
-
-> Status: Phase 1 — git data layer with fixture-repo tests (`npm test` inside
-> `app/`); commit graph + note renderers are next.
-
 ## Notes / known constraints
 
 - **Migrating from the old `.txt` storage**: repos that used the
